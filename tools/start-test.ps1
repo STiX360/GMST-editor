@@ -40,7 +40,7 @@ if ($SmokeTest) { $lines += 'content=GMSTProfilesSmoke.omwscripts' }
 [IO.File]::WriteAllLines((Join-Path $profile 'openmw.cfg'), $lines)
 $settings = Join-Path $profile 'settings.cfg'
 if (-not (Test-Path -LiteralPath $settings)) {
-    [IO.File]::WriteAllText($settings, "[Video]`nresolution x = 1280`nresolution y = 720`nfullscreen = false`n[Sound]`nmusic volume = 0`n")
+    [IO.File]::WriteAllText($settings, "[Video]`nresolution x = 1920`nresolution y = 1080`nfullscreen = false`n[Sound]`nmusic volume = 0`n")
 }
 Write-Host "OpenMW $version; log: $profile\openmw.log"
 Write-Host "Isolated saves/storage: $userData"

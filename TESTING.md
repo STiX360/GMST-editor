@@ -9,6 +9,8 @@ The installed POTI OpenMW 0.52 executable is used without loading or modifying t
 POTI modlist/profile. Settings/logs are in `.runtime/manual-profile`, and saves and
 Lua storage are in `.runtime/manual-user-data`. Never load playthrough saves with
 test scripts enabled. Existing manual editor settings persist across launches.
+Fresh test profiles default to a 1920x1080 window. Existing settings.cfg files,
+including any display resolution you selected, are left unchanged by the launcher.
 
 ## First Check
 
