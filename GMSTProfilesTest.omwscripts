@@ -1,0 +1,5 @@
+LOAD: scripts/gmst_profiles/load.lua
+MENU: scripts/gmst_profiles/menu.lua
+PLAYER: scripts/gmst_profiles/player.lua
+PLAYER: scripts/gmst_profiles/test_player.lua
+GLOBAL: scripts/gmst_profiles/test_fixtures.lua

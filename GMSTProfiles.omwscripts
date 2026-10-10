@@ -1,0 +1,3 @@
+LOAD: scripts/gmst_profiles/load.lua
+MENU: scripts/gmst_profiles/menu.lua
+PLAYER: scripts/gmst_profiles/player.lua

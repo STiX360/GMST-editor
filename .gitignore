@@ -1,0 +1,10 @@
+__pycache__/
+*.py[cod]
+.venv/
+.runtime/
+.publishing/
+dist/
+reports/
+.pytest_cache/
+test-dist/
+.test-tools/

@@ -1,0 +1,22 @@
+{
+  "name": "GMST Editor for OpenMW",
+  "slug": "gmst-editor-openmw",
+  "archive_prefix": "GMST-Editor-OpenMW",
+  "identity": "GMSTProfiles",
+  "namespace": "gmst_profiles",
+  "engine_version": "0.52.0",
+  "version_file": "VERSION",
+  "main_branch": "main",
+  "prerelease": false,
+  "content_manifest": "GMSTProfiles.omwscripts",
+  "files": {
+    "GMSTProfiles.omwscripts": "GMSTProfiles.omwscripts",
+    "README.md": "README.md",
+    "scripts/gmst_profiles/load.lua": "scripts/gmst_profiles/load.lua",
+    "scripts/gmst_profiles/player.lua": "scripts/gmst_profiles/player.lua",
+    "scripts/gmst_profiles/menu.lua": "scripts/gmst_profiles/menu.lua",
+    "scripts/gmst_profiles/labels.lua": "scripts/gmst_profiles/labels.lua",
+    "scripts/gmst_profiles/editor_model.lua": "scripts/gmst_profiles/editor_model.lua",
+    "l10n/GmstProfiles/en.yaml": "l10n/GmstProfiles/en.yaml"
+  }
+}

@@ -1,0 +1,32 @@
+PageName: GMST Editor
+Relaunch: Changes are saved when you leave a value field and take effect after quitting and relaunching OpenMW.
+Controls: Application
+Gameplay: Gameplay Values
+Advanced: Other GMSTs
+AdvancedDescription: Edit another record by its exact GMST identifier. Numeric and string records are supported.
+Record: Record
+Weight slowdown: Weight slowdown
+Movement slowdown from carried weight. Lower values reduce the penalty.: Movement slowdown from carried weight. Lower values reduce the penalty.
+'Swimming speed: base': Swimming speed
+Base multiplier used when swimming at running speed.: Base multiplier used when swimming at running speed.
+'Swimming: Athletics scaling': Swimming Athletics scaling
+How strongly Athletics contributes to running swim speed.: How strongly Athletics contributes to running swim speed.
+'Jumping: weight base': Jump height base
+Base term in the jump-height formula for carried weight.: Base term in the jump-height formula for carried weight.
+'Jumping: weight multiplier': Jump height weight multiplier
+Multiplier in the jump-height formula for carried weight.: Multiplier in the jump-height formula for carried weight.
+Arrow speed multiplier: Arrow speed multiplier
+Multiplier used for arrow projectile speed.: Multiplier used for arrow projectile speed.
+Projectile speed at full draw: Projectile speed at full draw
+Arrow and bolt launch speed at full attack strength. Higher values make fully drawn shots faster.: Arrow and bolt launch speed at full attack strength. Higher values make fully drawn shots faster.
+Repair effectiveness: Repair effectiveness
+Multiplier used in the repair calculation.: Multiplier used in the repair calculation.
+Container respawn interval: Container respawn interval (months)
+Number of in-game months between eligible container respawns.: Number of in-game months between eligible container respawns.
+GroupName: Startup GMST Patch
+Enabled: Enabled
+Profile: Profile
+Verbose: Log applied profile
+vanilla: Vanilla
+balanced: Balanced
+generous: Generous
