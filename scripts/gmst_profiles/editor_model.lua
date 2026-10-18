@@ -106,6 +106,47 @@ end
 function M.format(value)
     return type(value) == 'number' and ('%.7g'):format(value) or tostring(value)
 end
+function M.kind(record)
+    return type(record.value) == 'string' and 'string'
+        or record.id:sub(1, 1):lower() == 'i' and 'integer' or 'float'
+end
+function M.displayName(record, labels)
+    local id = record.id:lower()
+    return M.common[id] and M.common[id][1] or labels and labels[id] or record.id
+end
+function M.description(record)
+    local id = record.id:lower()
+    if M.common[id] then return M.common[id][2] end
+    return record.id .. ' (' .. M.kind(record) .. ', ' .. M.categoryNames[M.category(record.id)] .. ')'
+end
+function M.searchText(record, labels)
+    return table.concat({
+        record.id,
+        M.displayName(record, labels),
+        M.description(record),
+        M.categoryNames[M.category(record.id)] or '',
+        M.kind(record),
+    }, ' '):lower()
+end
+function M.search(records, labels, query, limit)
+    query = tostring(query or ''):lower():match('^%s*(.-)%s*$')
+    limit = limit or 24
+    local results = {}
+    if query == '' then return results, 0 end
+    for index, record in ipairs(records) do
+        if M.searchText(record, labels):find(query, 1, true) then
+            results[#results + 1] = record
+            if #results >= limit then
+                local count = #results
+                for i = index + 1, #records do
+                    if M.searchText(records[i], labels):find(query, 1, true) then count = count + 1 end
+                end
+                return results, count
+            end
+        end
+    end
+    return results, #results
+end
 function M.save(section, record, text)
     if not record then return false, 'Unknown GMST identifier.' end
     local value, err = M.parse(record.id, text, record.value)

@@ -4,7 +4,7 @@
 
 VERSION is the version source; CHANGELOG.md must contain exactly one matching
 section. Configuration retains the GMSTProfiles runtime identity, root-level
-install paths, and the GMST-Editor-OpenMW ZIP naming convention. Version 0.4.0 is
+install paths, and the GMST-Editor-OpenMW ZIP naming convention. Version 0.5.0 is
 configured as a stable release (`prerelease: false`). This status does not imply
 that every GMST or modlist has been gameplay-tested.
 
@@ -25,7 +25,7 @@ separately to test-dist/ and are never uploaded by the release workflows.
 
 Configure this repository's GitHub remote and push reviewed source to main.
 When ready to publish, create and push the matching tag (for this version,
-`v0.4.0`). Tagging triggers tests and a deterministic package build, requires the
+`v0.5.0`). Tagging triggers tests and a deterministic package build, requires the
 tagged commit to belong to main, and publishes the same verified artifacts to
 GitHub Releases. Manual workflow dispatch builds only; it does not publish.
 Do not move a published tag. Matching existing release assets are accepted on
@@ -51,6 +51,7 @@ can cause duplicate versions on retry: inspect Nexus first and retry only failed
 jobs while retained artifacts are available (14 days).
 
 Actions artifact downloads wrap the install-ready ZIP; extract that outer wrapper.
-GitHub and Nexus publication have not yet been exercised for this repository.
+The v0.4.0 workflow successfully published GitHub assets; its Nexus job was skipped.
+Verify the Nexus job outcome separately for each new release.
 
 Uploader: https://github.com/Nexus-Mods/upload-action

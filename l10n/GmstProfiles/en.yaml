@@ -1,10 +1,11 @@
 PageName: GMST Editor
 Relaunch: Changes are saved when you leave a value field and take effect after quitting and relaunching OpenMW.
 Controls: Application
-Gameplay: Gameplay Values
-Advanced: Other GMSTs
-AdvancedDescription: Edit another record by its exact GMST identifier. Numeric and string records are supported.
+Advanced: Direct Edit
+AdvancedDescription: Edit a record by its exact GMST identifier. Numeric and string records are supported.
 Record: Record
+SearchAll: Search GMSTs
+SearchDescription: Search loaded GMSTs by identifier, generated label, type, or category.
 Weight slowdown: Weight slowdown
 Movement slowdown from carried weight. Lower values reduce the penalty.: Movement slowdown from carried weight. Lower values reduce the penalty.
 'Swimming speed: base': Swimming speed

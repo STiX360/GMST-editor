@@ -68,8 +68,9 @@ def test_native_number_field_saves_on_blur_and_resets(runtime):
             end
             return sections[name]
         end
-        local templates = {box={}, padding={}, interval={}, textNormal={}, textEditBox={}, textEditLine={}}
+        local templates = {box={}, padding={}, interval={}, textNormal={}, textParagraph={}, textEditBox={}, textEditLine={}}
         package.preload['scripts.gmst_profiles.editor_model'] = function() return model end
+        package.preload['scripts.gmst_profiles.labels'] = function() return {} end
         package.preload['openmw.storage'] = function() return {playerSection=section} end
         package.preload['openmw.core'] = function() return {} end
         package.preload['openmw.ui'] = function() return {
@@ -134,10 +135,26 @@ def test_native_number_field_saves_on_blur_and_resets(runtime):
         form.content[2].content[1].events.textChanged('otherRecord')
         form.content[6].content[1].events.mouseClick()
         assert(overrides:get('sYes') == 'Test string')
+        local searchValue = {query=''}
+        local function setSearch(v) searchValue=v end
+        local search = nativeRenderers.gmstEditorSearch({query='yes'}, setSearch,
+            {records={{id='sYes',value='Yes'}, {id='fJumpHeight',value=2}}, limit=10})
+        search.content[2].content[1].events.textChanged('jump')
+        assert(searchValue.query == 'jump')
+        local resultColumn = search.content[4].content[1].content[1]
+        assert(resultColumn.type == 'Flex' and resultColumn.props.horizontal == false)
+        assert(resultColumn.content[1].props.text == 'sYes')
+        assert(resultColumn.content[3].props.text:find('sYes', 1, true))
+        assert(resultColumn.content[1].template == require('openmw.interfaces').MWUI.templates.textParagraph)
+        local resultValue = resultColumn.content[5]
+        local resultEdit = resultValue.content[1].content[1].content[1]
+        resultEdit.events.textChanged('Search string')
+        resultEdit.events.focusLoss()
+        assert(overrides:get('sYes') == 'Search string')
     ''')
 
 
-def test_every_loaded_record_has_one_native_row_and_edits_stay_synchronized(runtime):
+def test_search_and_direct_edit_keep_all_records_accessible_without_gameplay_group(runtime):
     runtime.execute('''
         local records = {
             {id='fencumberedmoveeffect',value=0.3}, {id='fprojectileminspeed',value=1000},
@@ -146,10 +163,10 @@ def test_every_loaded_record_has_one_native_row_and_edits_stay_synchronized(runt
         }
         local sections, pages, groups = {}, {}, {}
         registeredRecords = records
+        registeredPages = pages
         registeredGroups = groups
         testSections = sections
         package.preload['scripts.gmst_profiles.editor_model'] = function() return model end
-        package.preload['scripts.gmst_profiles.labels'] = function() return {} end
         package.preload['openmw.core'] = function() return {getGMST=function(id)
             if id == model.catalogId then return model.encode(records) end
             if id == model.appliedId then return model.encode({}) end
@@ -167,24 +184,32 @@ def test_every_loaded_record_has_one_native_row_and_edits_stay_synchronized(runt
             registerGroup=function(g) assert(not groups[g.key]); assert(pages[g.page]); groups[g.key]=g end,
         }} end
         require('openmw.storage').playerSection(model.overridesSection):set('sYes', 'Saved label')
+        require('openmw.storage').playerSection(model.overridesSection):set('fencumberedmoveeffect', 0.7)
     ''')
     runtime.execute('player = (function()\n' + (ROOT / 'scripts/gmst_profiles/player.lua').read_text() + '\nend)()')
     runtime.execute('''
-        local seen = {}
+        local pageCount = 0
+        for _ in pairs(registeredPages) do pageCount = pageCount + 1 end
+        assert(pageCount == 1 and registeredPages.GmstEditor)
         assert(player.interface.exposedCount() == #registeredRecords)
-        for _, group in pairs(registeredGroups) do
-            for _, field in ipairs(group.settings) do
-                if field.argument then
-                    assert(not seen[field.key]); seen[field.key]=field
-                    assert(field.argument.section == group.key)
-                    assert(model.sectionFor(field.key) == group.key)
-                end
-            end
-        end
+        assert(registeredGroups[model.valuesSection] == nil, 'Gameplay group must not be registered')
+        assert(testSections[model.valuesSection]:get('fencumberedmoveeffect') == 0.7,
+            'Removing the Gameplay group must preserve its saved override')
+        local groupCount = 0
+        for _ in pairs(registeredGroups) do groupCount = groupCount + 1 end
+        assert(groupCount == 3)
+        local direct = registeredGroups.SettingsPlayerGmstEditorAdvanced
+        assert(direct and direct.page == 'GmstEditor')
+        assert(direct.settings[1].renderer == 'gmstEditorAdvanced')
+        local search = registeredGroups.SettingsPlayerGmstEditorSearch
+        assert(search and search.page == 'GmstEditor')
+        assert(search.settings[1].renderer == 'gmstEditorSearch')
+        assert(#search.settings[1].argument.records == #registeredRecords)
+        local results = model.search(search.settings[1].argument.records, {}, 'Weight slowdown')
+        assert(#results == 1 and results[1].id == 'fencumberedmoveeffect')
         for _, record in ipairs(registeredRecords) do
-            local field = assert(seen[record.id])
-            assert(field.default == record.value)
-            assert(field.renderer == (type(record.value) == 'string' and 'gmstEditorString' or 'gmstEditorNumber'))
+            local section = testSections[model.sectionFor(record.id)]
+            assert(section:get(record.id) ~= nil)
         end
         local strings = testSections[model.sectionFor('sYes')]
         assert(strings:get('sYes') == 'Saved label')
@@ -197,4 +222,8 @@ def test_every_loaded_record_has_one_native_row_and_edits_stay_synchronized(runt
         assert(numbers:get('fprojectileminspeed') == 5)
         assert(player.interface.reset('fprojectileminspeed'))
         assert(numbers:get('fprojectileminspeed') == 1000)
+        assert(player.interface.set('fencumberedmoveeffect', '0.5'))
+        assert(testSections[model.valuesSection]:get('fencumberedmoveeffect') == 0.5)
+        assert(player.interface.reset('fencumberedmoveeffect'))
+        assert(testSections[model.valuesSection]:get('fencumberedmoveeffect') == 0.3)
     ''')

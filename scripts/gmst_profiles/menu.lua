@@ -5,6 +5,7 @@ local util = require('openmw.util')
 local async = require('openmw.async')
 local I = require('openmw.interfaces')
 local model = require('scripts.gmst_profiles.editor_model')
+local labels = require('scripts.gmst_profiles.labels')
 local overrides = storage.playerSection(model.overridesSection)
 local baselines = {}
 local watched = {}
@@ -21,6 +22,10 @@ local function watchSection(name)
 end
 local function text(s)
     return { template = I.MWUI.templates.textNormal, props = { text = s } }
+end
+local function paragraph(s)
+    return { template = I.MWUI.templates.textParagraph,
+        props = { text = s, size = util.vector2(310, 0) } }
 end
 local function button(s, callback)
     return { template = I.MWUI.templates.box,
@@ -60,6 +65,43 @@ local function renderValue(value, set, argument)
 end
 I.Settings.registerRenderer('gmstEditorNumber', renderValue)
 I.Settings.registerRenderer('gmstEditorString', renderValue)
+I.Settings.registerRenderer('gmstEditorSearch', function(value, set, argument)
+    local query = type(value) == 'table' and value.query or ''
+    local records = argument.records or {}
+    local results, count = model.search(records, labels, query, argument.limit or 20)
+    local content = {
+        text('Search'),
+        input(query, 260, nil, function(s) set { query = s } end),
+    }
+    if query == '' then
+        content[#content + 1] = text('Enter a GMST id, label, type, or category.')
+    elseif #results == 0 then
+        content[#content + 1] = text('No matching GMSTs.')
+    else
+        content[#content + 1] = text(('Showing %d of %d matches.'):format(#results, count))
+        for _, record in ipairs(results) do
+            local section = model.sectionFor(record.id)
+            local values = storage.playerSection(section)
+            local saved = overrides:get(record.id)
+            if not model.valid(record.id, saved, record.value) then saved = nil end
+            local current = saved ~= nil and saved or values:get(record.id)
+            if not model.valid(record.id, current, record.value) then current = record.value end
+            content[#content + 1] = { template = I.MWUI.templates.box, content = ui.content {
+                { template = I.MWUI.templates.padding, content = ui.content {
+                    { type = ui.TYPE.Flex, props = { horizontal = false }, content = ui.content {
+                        paragraph(model.displayName(record, labels)),
+                        { template = I.MWUI.templates.interval },
+                        paragraph(model.description(record)),
+                        { template = I.MWUI.templates.interval },
+                        renderValue(current, function(v) values:set(record.id, v) end,
+                            { id = record.id, baseline = record.value, section = section }),
+                    } },
+                } },
+            } }
+        end
+    end
+    return { type = ui.TYPE.Flex, content = ui.content(content) }
+end)
 I.Settings.registerRenderer('gmstEditorAdvanced', function(value, set)
     local idDraft, valueDraft = value.id or '', value.text or ''
     local lookup = {}

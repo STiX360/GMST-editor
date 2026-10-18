@@ -15,6 +15,10 @@ def prepared_launcher(tmp_path):
     tools.mkdir()
     script = tools / 'start-test.ps1'
     shutil.copyfile(ROOT / 'tools/start-test.ps1', script)
+    for directory in ('scripts', 'l10n'):
+        shutil.copytree(ROOT / directory, tmp_path / directory)
+    for name in ('GMSTProfiles.omwscripts', 'GMSTProfilesTest.omwscripts', 'GMSTProfilesSmoke.omwscripts'):
+        shutil.copyfile(ROOT / name, tmp_path / name)
     engine = tmp_path / 'engine/openmw.exe'
     engine.parent.mkdir()
     engine.touch()
@@ -52,3 +56,25 @@ def test_prepare_preserves_chosen_display_settings(prepared_launcher):
     settings.write_bytes(chosen)
     prepare()
     assert settings.read_bytes() == chosen
+
+
+def test_launcher_uses_staged_mod_data_instead_of_scanning_repository(prepared_launcher):
+    prepare, settings = prepared_launcher
+    prepare()
+    staged = settings.parent.parent / 'manual-mod-data'
+    config = (settings.parent / 'openmw.cfg').read_text()
+    assert f'data="{staged.as_posix()}"' in config
+    assert f'data="{settings.parents[2].as_posix()}"' not in config
+    assert (staged / 'GMSTProfilesTest.omwscripts').read_bytes() == (ROOT / 'GMSTProfilesTest.omwscripts').read_bytes()
+    assert (staged / 'scripts/gmst_profiles/menu.lua').read_bytes() == (ROOT / 'scripts/gmst_profiles/menu.lua').read_bytes()
+    assert not (staged / 'tools').exists()
+    assert not (staged / '.git').exists()
+
+
+def test_prepare_refreshes_staged_scripts(prepared_launcher):
+    prepare, settings = prepared_launcher
+    prepare()
+    staged = settings.parent.parent / 'manual-mod-data/scripts/gmst_profiles/menu.lua'
+    staged.write_text('stale source')
+    prepare()
+    assert staged.read_bytes() == (ROOT / 'scripts/gmst_profiles/menu.lua').read_bytes()

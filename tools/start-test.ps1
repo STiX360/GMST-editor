@@ -2,7 +2,8 @@ param(
     [string]$Engine = 'C:\Modlists\POTI\.OpenMW\openmw.exe',
     [string]$GameData = 'D:\Steam\steamapps\common\Morrowind\Data Files',
     [switch]$PrepareOnly,
-    [switch]$SmokeTest
+    [switch]$SmokeTest,
+    [switch]$EnableSound
 )
 $ErrorActionPreference = 'Stop'
 $projectRoot = Split-Path -Parent $PSScriptRoot
@@ -21,14 +22,21 @@ $name = if ($SmokeTest) { 'smoke' } else { 'manual' }
 $profile = Join-Path $projectRoot ".runtime\$name-profile"
 $userData = Join-Path $projectRoot ".runtime\$name-user-data"
 $localData = Join-Path $userData 'data'
-New-Item -ItemType Directory -Force -Path $profile,$userData,$localData | Out-Null
+$modData = Join-Path $projectRoot ".runtime\$name-mod-data"
+New-Item -ItemType Directory -Force -Path $profile,$userData,$localData,$modData | Out-Null
+foreach ($folder in @('scripts', 'l10n')) {
+    Copy-Item -LiteralPath (Join-Path $projectRoot $folder) -Destination $modData -Recurse -Force
+}
+foreach ($manifest in @('GMSTProfiles.omwscripts', 'GMSTProfilesTest.omwscripts', 'GMSTProfilesSmoke.omwscripts')) {
+    Copy-Item -LiteralPath (Join-Path $projectRoot $manifest) -Destination $modData -Force
+}
 $lines = @(
     'replace=config', 'replace=data', 'replace=content', 'replace=groundcover',
     'replace=fallback-archive',
     ('resources="' + $resources.Replace('\','/') + '"'),
     ('data="' + $resources.Replace('\','/') + '/vfs-mw"'),
     ('data="' + $gamePath.Replace('\','/') + '"'),
-    ('data="' + $projectRoot.Replace('\','/') + '"'),
+    ('data="' + $modData.Replace('\','/') + '"'),
     ('data-local="' + $localData.Replace('\','/') + '"'),
     'content=Morrowind.esm', 'fallback-archive=Morrowind.bsa',
     'content=GMSTProfilesTest.omwscripts'
@@ -47,6 +55,7 @@ Write-Host "Isolated saves/storage: $userData"
 if ($PrepareOnly) { return }
 $arguments = @('--replace', 'config', '--config', ('"' + $profile + '"'),
     '--user-data', ('"' + $userData + '"'), '--skip-menu', '--new-game=0', '--start', '"Seyda Neen"', '--no-grab')
+if ($SmokeTest -and -not $EnableSound) { $arguments += '--no-sound' }
 $windowStyle = if ($SmokeTest) { 'Hidden' } else { 'Normal' }
 $runs = if ($SmokeTest) { 4 } else { 1 }
 for ($run = 0; $run -lt $runs; $run++) {

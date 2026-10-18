@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.5.0
+
+- Replace the category pages with one GMST Editor page and searchable results.
+- Search loaded GMSTs by identifier, label, type, or category.
+- Rename the exact-identifier editor to Direct Edit and remove the separate Gameplay Values section.
+- Create editing rows for matching search results instead of the entire catalog at startup.
+- Fix overlapping result titles, descriptions, fields, and Reset buttons with wrapped vertical layouts.
+- Preserve saved overrides, modlist-aware baselines, and the full-relaunch application requirement.
+
 ## 0.4.0
 
 - Edit all loaded numeric and string GMSTs through native OpenMW Scripts settings.

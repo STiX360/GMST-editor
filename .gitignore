@@ -8,3 +8,12 @@ reports/
 .pytest_cache/
 test-dist/
 .test-tools/
+pytest-cache-files-*/
+.coverage
+.coverage.*
+htmlcov/
+*.log
+*.dmp
+Thumbs.db
+.DS_Store
+/AGENTS.md
